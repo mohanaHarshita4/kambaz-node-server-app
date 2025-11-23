@@ -14,12 +14,25 @@ const app = express();
 
 console.log("Express app created");
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://kambaz-next-js-md72.vercel.app",
+];
+
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
   })
 );
+
+
 
 console.log("CORS configured");
 
