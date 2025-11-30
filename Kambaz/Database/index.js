@@ -1,8 +1,9 @@
-import courses from "./courses.js";
-import modules from "./modules.js";
-import assignments from "./assignments.js";
-import users from "./users.js";
-import grades from "./grades.js";
-import enrollments from "./enrollments.js";
+import mongoose from "mongoose";
 
-export default { courses, modules, assignments, users, grades, enrollments };
+const CONNECTION_STRING = "mongodb://127.0.0.1:27017/kambaz";
+
+mongoose.connect(CONNECTION_STRING)
+  .then(() => console.log(" MongoDB Connected Successfully"))
+  .catch(err => console.log(" MongoDB Connection Error:", err));
+
+export default mongoose;

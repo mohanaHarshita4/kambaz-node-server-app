@@ -1,27 +1,9 @@
-import * as modulesDao from "./dao.js";
+import * as dao from "./dao.js";
 
 export default function ModuleRoutes(app) {
-  const deleteModule = async (req, res) => {
-    try {
-      const { moduleId } = req.params;
-      modulesDao.deleteModule(moduleId);
-      res.sendStatus(204);
-    } catch (error) {
-      res.status(404).json({ message: error.message });
-    }
-  };
-
-  const updateModule = async (req, res) => {
-    try {
-      const { moduleId } = req.params;
-      const moduleUpdates = req.body;
-      const status = modulesDao.updateModule(moduleId, moduleUpdates);
-      res.json(status);
-    } catch (error) {
-      res.status(404).json({ message: error.message });
-    }
-  };
-
-  app.delete("/api/modules/:moduleId", deleteModule);
-  app.put("/api/modules/:moduleId", updateModule);
+  app.get("/api/modules", async (req,res)=>res.send(await dao.findAllModules()));
+  app.get("/api/courses/:cid/modules", async (req,res)=>res.send(await dao.findModulesByCourse(req.params.cid)));
+  app.post("/api/modules", async (req,res)=>res.send(await dao.createModule(req.body)));
+  app.put("/api/modules/:id", async (req,res)=>res.send(await dao.updateModule(req.params.id,req.body)));
+  app.delete("/api/modules/:id", async (req,res)=>res.send(await dao.deleteModule(req.params.id)));
 }

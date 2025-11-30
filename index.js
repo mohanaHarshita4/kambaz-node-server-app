@@ -8,51 +8,52 @@ import CourseRoutes from "./Kambaz/Courses/routes.js";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
+import mongoose from "mongoose";
+import "./Kambaz/Database/index.js";
+
+const CONNECTION_STRING =
+  process.env.DATABASE_CONNECTION_STRING ||
+  "mongodb+srv://mohanaharshita04_db_user:21B81A05c5@cluster0.cyendtl.mongodb.net/kambaz?retryWrites=true&w=majority";
+
+mongoose.connect(CONNECTION_STRING)
+  .then(() => console.log(" MongoDB Atlas Connected"))
+  .catch(err => console.log(" MongoDB Connection Error:", err));
+
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "https://kambaz-next-js-md72.vercel.app",
-  "https://kambaz-next-js-md72-git-main-mohana-harshitas-projects.vercel.app/",
-  "http://localhost:3000", 
-].filter(Boolean);
-
+// CORS MUST COME FIRST
 app.use(
   cors({
     credentials: true,
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
   })
 );
 
-// Session configuration
+// SESSION CONFIGURATION
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    secure: false,        // ← CHANGE THIS for local development
+    httpOnly: true,
+    sameSite: 'lax',      // ← ADD THIS
+    maxAge: 24 * 60 * 60 * 1000  // 24 hours
+  }
 };
 
-if (process.env.SERVER_ENV !== "development") {
+// Only use secure cookies in production
+if (process.env.SERVER_ENV === "production") {
   sessionOptions.proxy = true;
-  sessionOptions.cookie = {
-    sameSite: "none",
-    secure: true,
-  };
+  sessionOptions.cookie.secure = true;
+  sessionOptions.cookie.sameSite = "none";
 }
 
 app.use(session(sessionOptions));
 app.use(express.json());
 
-// ROOT ROUTE - ADD THIS
+// ROOT ROUTE
 app.get("/", (req, res) => {
   res.send("Welcome to Full Stack Development!");
 });
@@ -69,4 +70,3 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
